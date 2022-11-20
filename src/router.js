@@ -15,12 +15,6 @@ router.get("/usuario", balance.detailBalance);
 
 router.post("/transacao", transactions.transfer);
 router.get("/transacao/extrato", transactions.extract);
-// router.get('/transacao/extrato', transactions.getTransactionExtract);
-
-// router.get('/transacao', transactions.listTransactions);
-// router.get('/transacao/:id', transactions.listUserTransaction);
-// router.post('/transacao', transactions.registerTransaction);
-// router.put('/transacao/:id', transactions.updateTransaction);
-// router.delete('/transacao/:id', transactions.deleteTransaction);
+router.get("/transacao/detalhada", transactions.extractDetail);
 
 module.exports = router;

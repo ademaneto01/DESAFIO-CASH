@@ -1,8 +1,10 @@
 const { knex } = require("../database/connection");
+const { format } = require("date-fns");
 
 async function transfer(req, res) {
   const { user } = req;
   const { value, usuario } = req.body;
+  const data = new Date();
 
   try {
     const valueExistes = await knex("accounts")
@@ -38,7 +40,7 @@ async function transfer(req, res) {
       debitedaccountid: user.accountid,
       creditedaccountid: userExistes[0].accountid,
       valor: value,
-      createdat: new Date(),
+      createdat: format(data, "MM/dd/yyyy"),
     });
 
     return res
@@ -81,7 +83,63 @@ async function extract(req, res) {
   }
 }
 
+async function extractDetail(req, res) {
+  const { user } = req;
+  const { tipoTransacao, dataTransacao } = req.body;
+  let typeTransaction = "";
+  let extractTransactionsDebited = "";
+  let extractTransactionsCredited = "";
+  let extractTransactionsData = "";
+
+  try {
+    if (tipoTransacao == "checkOut") {
+      extractTransactionsCredited = await knex("transactions")
+        .where({
+          creditedaccountid: user.accountid,
+        })
+        .returning("*");
+    } else if (tipoTransacao == "checkIn") {
+      extractTransactionsDebited = await knex("transactions")
+        .where({
+          debitedaccountid: user.accountid,
+        })
+        .returning("*");
+    } else if (dataTransacao) {
+      extractTransactionsData = await knex("transactions")
+        .where({
+          createdat: dataTransacao,
+        })
+        .returning("*");
+    }
+
+    if (
+      !extractTransactionsDebited[0] &&
+      !extractTransactionsCredited[0] &&
+      !extractTransactionsData[0]
+    ) {
+      return res
+        .status(200)
+        .json({ mensagem: "Não existe transações para este usuario." });
+    }
+
+    if (tipoTransacao) {
+      typeTransaction =
+        tipoTransacao === "checkOut"
+          ? extractTransactionsCredited
+          : extractTransactionsDebited;
+    } else if (!tipoTransacao && dataTransacao) {
+      typeTransaction = extractTransactionsData;
+    }
+    return res.status(200).json({
+      transações: typeTransaction,
+    });
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+}
+
 module.exports = {
   transfer,
   extract,
+  extractDetail,
 };
