@@ -35,6 +35,10 @@ npm run dev
 - schema.sql possui as tabelas necessaria para criação do banco seu banco de dados.
 - .env.example possui os exemplos de chaves necessarias para relacionar seu banco de dados.
 
+**Consulta data**
+
+Para consultar extrato por data é necessario passar no seguinte padrão "mes/dia/ano".
+
 <h1>Conclusão</h1>
 
 <p>
